@@ -206,9 +206,8 @@ end
 
 
 function Main()
-    Init()
     if (TryAdvance() == false) then
-        print("aw hec you teased me :'(")
+        print("aw heck you tricked me :'(")
         return
     end
     if (DigOutWidthFirst) then
@@ -227,5 +226,5 @@ function Main()
 end
 
 
-
+Init()
 Main()
