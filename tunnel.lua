@@ -87,7 +87,10 @@ function TryPoke()
     return false
 end
 function TryAdvance()
-    if (TryPoke() == false) then return false end
+    if (TryPoke() == false) then
+        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Can't Advance") end
+        return false
+    end
 
     if (Heading == "n" and CurrentZ < MaxZ) then
         if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing North") end
@@ -167,27 +170,29 @@ function TryAdvanceTilEndOfLine()
 end
 
 function TurnRight()
-    if (Heading == "n") then Heading = "e" end
-    if (Heading == "e") then Heading = "s" end
-    if (Heading == "s") then Heading = "w" end
-    if (Heading == "w") then Heading = "n" end
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turning Right. Heading = " ..Heading) end
+    if (Heading == "n") then Heading = "e"
+    elseif (Heading == "e") then Heading = "s"
+    elseif (Heading == "s") then Heading = "w"
+    elseif (Heading == "w") then Heading = "n"
+    end
+    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Right. New Heading = " ..Heading) end
     turtle.turnRight()
 end
 function TurnLeft()
-    if (Heading == "n") then Heading = "w" end
-    if (Heading == "w") then Heading = "s" end
-    if (Heading == "s") then Heading = "e" end
-    if (Heading == "e") then Heading = "n" end
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turning Left. Heading = " ..Heading) end
+    if (Heading == "n") then Heading = "w"
+    elseif (Heading == "w") then Heading = "s"
+    elseif (Heading == "s") then Heading = "e"
+    elseif (Heading == "e") then Heading = "n"
+    end
+    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Left. New Heading = " ..Heading) end
     turtle.turnLeft()
 end
 function Turn()
     if (PreviousUTurnDirection == "left") then
         TurnRight()
-        return
+    elseif (PreviousUTurnDirection == "right") then
+        TurnLeft()
     end
-    TurnLeft()
 end
 function TryUTurn()    
     Turn()
