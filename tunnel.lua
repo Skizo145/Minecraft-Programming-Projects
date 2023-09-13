@@ -1,5 +1,5 @@
 MaxZ = 1
-CurrentZ = 011
+CurrentZ = 0
 MaxX = 1
 CurrentX = 1
 MaxY = 1
