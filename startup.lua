@@ -1,6 +1,5 @@
 sleep(1)
 print("Deleting old programs...")
-shell.run("delete test")
 shell.run("delete tunnel")
 sleep(1)
 print("Reinitialising...")
