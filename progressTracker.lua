@@ -3,9 +3,8 @@ myModem.open(1)
 trackedSignals = {}
 
 function Display()
-    
-    for (k, v) in ipairs(trackedSignals) do
-        print(k, v)
+    for key, value in pairs(trackedSignals) do
+        print(key, value)
     end
 end
 
@@ -17,7 +16,7 @@ function WaitForMessage()
         trackedSignals[replyChannel] = 0
         return
     end
-    if (typeof(message) == "number") then
+    if (type(message) == "number") then
         trackedSignals[replyChannel] = message
     end
 end

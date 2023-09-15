@@ -9,7 +9,13 @@ Heading = "n"
 PreviousUTurnDirection = "left"
 SkipAirSpacesAbove = false
 DigOutWidthFirst = false
+TotalVolume = 0
+MyModem = peripheral.wrap("back")
+MyChannel = math.random(100, 65530)
+HostChannel = 1
+
 DebugLevel = 0 -- 0-3
+
 
 function GetFuelLevel()
     local coal = 0
@@ -20,14 +26,14 @@ function GetFuelLevel()
         input = read()
         if input("y") then
             print "Confirmed"
-        else 
+        else
             print "Please add coal to slot 1"
             turtle.select(1)
             print "Please confirm when done <Enter>"
             input = read()
             if details.name ~= "minecraft.coal" then
                 print "I do not see coal in slot 1"
-            else 
+            else
                 print "Refueling"
                 turtle.refuel()
                 coal = 1
@@ -62,25 +68,44 @@ function Init()
     if (input == "w" or input == "W") then
         DigOutWidthFirst = true
     end
+
+    TotalVolume = MaxZ * MaxX * MaxY
+end
+
+function GetPercentageComplete()
+    return ((MaxX / CurrentX) * (MaxZ / CurrentZ) * MaxY) + (CurrentY - MaxY)
+end
+function TakeAction(nameOfAction)
+    if (nameOfAction == "dig") then turtle.dig()
+    elseif (nameOfAction == "digUp") then turtle.digUp()
+    elseif (nameOfAction == "digDown") then turtle.digDown()
+    elseif (nameOfAction == "forward") then turtle.forward()
+    elseif (nameOfAction == "up") then turtle.up()
+    elseif (nameOfAction == "down") then turtle.down()
+    elseif (nameOfAction == "turnRight") then turtle.turnRight()
+    elseif (nameOfAction == "turnLeft") then turtle.turnLeft()
+    else return end
     
+    MyModem.transmit(HostChannel, MyChannel, GetPercentageComplete())
+
 end
 
 function TryPoke()
     if (Heading == "n" and CurrentZ < MaxZ) then
         if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking North") end
-        turtle.dig()
+        TakeAction("dig")
         return true
     elseif (Heading == "s" and CurrentZ > 1) then
         if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking South") end
-        turtle.dig()
+        TakeAction("dig")
         return true
     elseif (Heading == "e" and CurrentX < MaxX) then
         if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking East") end
-        turtle.dig()
+        TakeAction("dig")
         return true
     elseif (Heading == "w" and CurrentX > 1) then
         if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking West") end
-        turtle.dig()
+        TakeAction("dig")
         return true
     end
 
@@ -94,22 +119,22 @@ function TryAdvance()
 
     if (Heading == "n" and CurrentZ < MaxZ) then
         if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing North") end
-        turtle.forward()
+        TakeAction("forward")
         CurrentZ = CurrentZ + 1
         return true
     elseif (Heading == "s" and CurrentZ > 1) then
         if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing South") end
-        turtle.forward()
+        TakeAction("forward")
         CurrentZ = CurrentZ - 1
         return true
     elseif (Heading == "e" and CurrentX < MaxX) then
         if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing East") end
-        turtle.forward()
+        TakeAction("forward")
         CurrentX = CurrentX + 1
         return true
     elseif (Heading == "w" and CurrentX > 1) then
         if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing West") end
-        turtle.forward()
+        TakeAction("forward")
         CurrentX = CurrentX - 1
         return true
     end
@@ -119,14 +144,14 @@ end
 
 function AdvanceUpward()
     if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing Upward") end
-    turtle.digUp()
-    turtle.up()
+    TakeAction("digUp")
+    TakeAction("up")
     CurrentY = CurrentY + 1
 end
 function AdvanceDownward()
     if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing Downward") end
-    turtle.digDown()
-    turtle.down()
+    TakeAction("digDown")
+    TakeAction("down")
     CurrentY = CurrentY - 1
 end
 function DigUpToTop()
@@ -176,7 +201,7 @@ function TurnRight()
     elseif (Heading == "w") then Heading = "n"
     end
     if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Right. New Heading = " ..Heading) end
-    turtle.turnRight()
+    TakeAction("turnRight")
 end
 function TurnLeft()
     if (Heading == "n") then Heading = "w"
@@ -185,7 +210,7 @@ function TurnLeft()
     elseif (Heading == "e") then Heading = "n"
     end
     if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Left. New Heading = " ..Heading) end
-    turtle.turnLeft()
+    TakeAction("turnLeft")
 end
 function Turn()
     if (PreviousUTurnDirection == "left") then
@@ -227,6 +252,7 @@ function Main()
 
     print("I'm all done! :D")
 end
+
 
 
 Init()
