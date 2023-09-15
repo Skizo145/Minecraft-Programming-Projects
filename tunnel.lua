@@ -42,6 +42,23 @@ function GetFuelLevel()
     end
 end
 
+function GetPercentageComplete()
+    return ((MaxX / CurrentX) * (MaxZ / CurrentZ) * MaxY) + (CurrentY - MaxY)
+end
+function TakeAction(nameOfAction)
+    if (nameOfAction == "dig") then turtle.dig()
+    elseif (nameOfAction == "digUp") then turtle.digUp()
+    elseif (nameOfAction == "digDown") then turtle.digDown()
+    elseif (nameOfAction == "forward") then turtle.forward()
+    elseif (nameOfAction == "up") then turtle.up()
+    elseif (nameOfAction == "down") then turtle.down()
+    elseif (nameOfAction == "turnRight") then turtle.turnRight()
+    elseif (nameOfAction == "turnLeft") then turtle.turnLeft()
+    else return end
+    
+    MyModem.transmit(HostChannel, MyChannel, GetPercentageComplete())
+end
+
 function Init()
     local input = ""
 
@@ -70,24 +87,6 @@ function Init()
     end
 
     TotalVolume = MaxZ * MaxX * MaxY
-end
-
-function GetPercentageComplete()
-    return ((MaxX / CurrentX) * (MaxZ / CurrentZ) * MaxY) + (CurrentY - MaxY)
-end
-function TakeAction(nameOfAction)
-    if (nameOfAction == "dig") then turtle.dig()
-    elseif (nameOfAction == "digUp") then turtle.digUp()
-    elseif (nameOfAction == "digDown") then turtle.digDown()
-    elseif (nameOfAction == "forward") then turtle.forward()
-    elseif (nameOfAction == "up") then turtle.up()
-    elseif (nameOfAction == "down") then turtle.down()
-    elseif (nameOfAction == "turnRight") then turtle.turnRight()
-    elseif (nameOfAction == "turnLeft") then turtle.turnLeft()
-    else return end
-    
-    MyModem.transmit(HostChannel, MyChannel, GetPercentageComplete())
-
 end
 
 function TryPoke()
