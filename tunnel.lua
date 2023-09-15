@@ -208,8 +208,6 @@ end
 
 
 
-
-
 function Main()
     if (TryAdvance() == false) then
         print("aw heck you tricked me :'(")
