@@ -1,4 +1,7 @@
-local modem = peripheral.wrap("back") -- Wraps the modem on the right side.
-modem.transmit(3, 1, "Hello world!") 
+local myModem = peripheral.wrap("back")
+local myChannel = math.random(2, 65530)
+local hostChannel = 1
 
---peripheral.call("right", "transmit", 3, 1, "This will also work!")
+print("Opening channel: " ..myChannel)
+
+myModem.transmit(1, myChannel, 10) 

@@ -9,7 +9,7 @@ Heading = "n"
 PreviousUTurnDirection = "left"
 SkipAirSpacesAbove = false
 DigOutWidthFirst = false
-DebugLevel = 3 -- 0-3
+DebugLevel = 0 -- 0-3
 
 function GetFuelLevel()
     local coal = 0
