@@ -46,26 +46,27 @@ function Prompt()
     maxZ = tonumber(read())
     if (maxZ < 1) then maxZ = 0 end
 
-    print("aaand how wide do you need it?")
+    print("aaand how wide do you need it? :D")
     maxX = tonumber(read())
     if (maxX < 1) then maxX = 1 end
 
-    print("ok last question... How tall? ^.^")
+    print("ok last question! How tall? ^.^")
     maxY = tonumber(read())
     if (maxY < 1) then maxY = 1 end
 
-    print("Oh also should I stop digging up if there's an empty space above? (y/n)")
+    print("Oh also! Should I stop digging up if there's an empty space above me? (y/n)")
     input = read()
     if (input == "y" or input == "Y") then
         skipAirSpacesAbove = true
     end
 
-    print("Dig Length first? Or Width first? (l/w)")
+    print("Wait one more question sowwy x//x umm do you want me to dig long-ways or wide-ways? (l/w)")
     input = read()
     if (input == "w" or input == "W") then
         digOutWidthFirst = true
     end
 
+    print("kk I'll try to do it good for you master ^//^")
 end
 
 function TryPoke()
@@ -256,4 +257,5 @@ function DoIhaveEnoughFuel()
 end
 
 Prompt()
+DoIhaveEnoughFuel()
 Main()
