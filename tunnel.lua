@@ -1,4 +1,4 @@
-local maxZ = 1
+local maxZ = 0
 local currentZ = 0
 local maxX = 1
 local currentX = 1
@@ -17,31 +17,6 @@ local myChannel = math.random(100, 65530)
 local hostChannel = 1
 
 local debugLevel = 0 -- 0-3
-
-function PromptForRefuel()
-    local coal = 0
-    local details = turtle.getItemDetail() 
-    while coal == 0 do
-        print ("I have " ..turtle.getFuelLevel().. " fuel")
-        print ("Would you like to add more fuel? y/n")
-        input = read()
-        if input("y") then
-            print "Confirmed"
-        else
-            print "Please add coal to slot 1"
-            turtle.select(1)
-            print "Please confirm when done <Enter>"
-            input = read()
-            if details.name ~= "minecraft.coal" then
-                print "I do not see coal in slot 1"
-            else
-                print "Refueling"
-                turtle.refuel()
-                coal = 1
-            end
-        end
-    end
-end
 
 function Transmit(message)
     myModem.transmit(hostChannel, myChannel, message)
@@ -64,7 +39,7 @@ function TakeAction(nameOfAction)
     Transmit(GetPercentageComplete())
 end
 
-function Init()
+function Prompt()
     local input = ""
 
     print("How far should I dig?")
@@ -169,7 +144,6 @@ function AdvanceDownward()
 end
 function DigUpToTop()
     if (currentY >= maxY) then return end
-
     if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Digging Up To Top") end
 
     while (currentY < maxY) do
@@ -194,6 +168,7 @@ function TryAdvanceTilEndOfLine()
     if (debugLevel >= 1) then print("(" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Beginning Line") end
     local atDestination = (not TryPoke())
     if (atDestination) then return false end
+    
     while (not atDestination) do
         DigUpToTop()
         TryAdvance()
@@ -267,7 +242,18 @@ function Main()
     print("I'm all done! :D")
 end
 
+function DoIhaveEnoughFuel()
+    local fuel = turtle.getFuelLevel()
+    if (fuel < (maxZ * maxX * maxY)) then
+        print("I dont have enough fuel for that... Plz fill me daddy >.<")
+        sleep(2)
+        print("I need at least " ..((maxZ * maxX * maxY) - fuel).. " more")
+        sleep(1)
+        print("Press enter when you are done filling me up UwU")
+        read()
+        shell.run("refuel all")
+    end
+end
 
-
-Init()
+Prompt()
 Main()
