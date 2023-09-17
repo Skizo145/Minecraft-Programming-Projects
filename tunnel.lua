@@ -1,23 +1,24 @@
-MaxZ = 1
-CurrentZ = 0
-MaxX = 1
-CurrentX = 1
-MaxY = 1
-CurrentY = 1
+local maxZ = 1
+local currentZ = 0
+local maxX = 1
+local currentX = 1
+local maxY = 1
+local currentY = 1
 
-Heading = "n"
-PreviousUTurnDirection = "left"
-SkipAirSpacesAbove = false
-DigOutWidthFirst = false
-TotalVolume = 0
-MyModem = peripheral.wrap("back")
-MyChannel = math.random(100, 65530)
-HostChannel = 1
+local heading = "n"
+local previousUTurnDirection = "left"
+local skipAirSpacesAbove = false
+local digOutWidthFirst = false
+local blocksTraveledZ = 0
+local blocksTraveledX = 0
+local blocksTraveledY = 0
+local myModem = peripheral.wrap("right")
+local myChannel = math.random(100, 65530)
+local hostChannel = 1
 
-DebugLevel = 0 -- 0-3
+local debugLevel = 0 -- 0-3
 
-
-function GetFuelLevel()
+function PromptForRefuel()
     local coal = 0
     local details = turtle.getItemDetail() 
     while coal == 0 do
@@ -42,8 +43,12 @@ function GetFuelLevel()
     end
 end
 
+function Transmit(message)
+    myModem.transmit(hostChannel, myChannel, message)
+end
 function GetPercentageComplete()
-    return ((MaxX / CurrentX) * (MaxZ / CurrentZ) * MaxY) + (CurrentY - MaxY)
+    return ((blocksTraveledZ * maxY) + (blocksTraveledX * maxY) + blocksTraveledY)
+        / (maxZ * maxX * maxY) * 100 - maxY
 end
 function TakeAction(nameOfAction)
     if (nameOfAction == "dig") then turtle.dig()
@@ -54,56 +59,55 @@ function TakeAction(nameOfAction)
     elseif (nameOfAction == "down") then turtle.down()
     elseif (nameOfAction == "turnRight") then turtle.turnRight()
     elseif (nameOfAction == "turnLeft") then turtle.turnLeft()
-    else return end
+    end
     
-    MyModem.transmit(HostChannel, MyChannel, GetPercentageComplete())
+    Transmit(GetPercentageComplete())
 end
 
 function Init()
     local input = ""
 
     print("How far should I dig?")
-    MaxZ = tonumber(read())
-    if (MaxZ < 1) then MaxZ = 0 end
+    maxZ = tonumber(read())
+    if (maxZ < 1) then maxZ = 0 end
 
-    print("How wide should the tunnel be?")
-    MaxX = tonumber(read())
-    if (MaxX < 1) then MaxX = 1 end
+    print("aaand how wide do you need it?")
+    maxX = tonumber(read())
+    if (maxX < 1) then maxX = 1 end
 
-    print("... And how tall?")
-    MaxY = tonumber(read())
-    if (MaxY < 1) then MaxY = 1 end
+    print("ok last question... How tall? ^.^")
+    maxY = tonumber(read())
+    if (maxY < 1) then maxY = 1 end
 
     print("Oh also should I stop digging up if there's an empty space above? (y/n)")
     input = read()
     if (input == "y" or input == "Y") then
-        SkipAirSpacesAbove = true
+        skipAirSpacesAbove = true
     end
 
     print("Dig Length first? Or Width first? (l/w)")
     input = read()
     if (input == "w" or input == "W") then
-        DigOutWidthFirst = true
+        digOutWidthFirst = true
     end
 
-    TotalVolume = MaxZ * MaxX * MaxY
 end
 
 function TryPoke()
-    if (Heading == "n" and CurrentZ < MaxZ) then
-        if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking North") end
+    if (heading == "n" and currentZ < maxZ) then
+        if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Poking North") end
         TakeAction("dig")
         return true
-    elseif (Heading == "s" and CurrentZ > 1) then
-        if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking South") end
+    elseif (heading == "s" and currentZ > 1) then
+        if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Poking South") end
         TakeAction("dig")
         return true
-    elseif (Heading == "e" and CurrentX < MaxX) then
-        if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking East") end
+    elseif (heading == "e" and currentX < maxX) then
+        if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Poking East") end
         TakeAction("dig")
         return true
-    elseif (Heading == "w" and CurrentX > 1) then
-        if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Poking West") end
+    elseif (heading == "w" and currentX > 1) then
+        if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Poking West") end
         TakeAction("dig")
         return true
     end
@@ -112,29 +116,37 @@ function TryPoke()
 end
 function TryAdvance()
     if (TryPoke() == false) then
-        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Can't Advance") end
+        if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Can't Advance") end
         return false
     end
 
-    if (Heading == "n" and CurrentZ < MaxZ) then
-        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing North") end
+    if (heading == "n" and currentZ < maxZ) then
+        if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing North") end
         TakeAction("forward")
-        CurrentZ = CurrentZ + 1
+        currentZ = currentZ + 1
+        blocksTraveledZ = blocksTraveledZ + 1
+        blocksTraveledY = 0
         return true
-    elseif (Heading == "s" and CurrentZ > 1) then
-        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing South") end
+    elseif (heading == "s" and currentZ > 1) then
+        if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing South") end
         TakeAction("forward")
-        CurrentZ = CurrentZ - 1
+        currentZ = currentZ - 1
+        blocksTraveledZ = blocksTraveledZ + 1
+        blocksTraveledY = 0
         return true
-    elseif (Heading == "e" and CurrentX < MaxX) then
-        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing East") end
+    elseif (heading == "e" and currentX < maxX) then
+        if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing East") end
         TakeAction("forward")
-        CurrentX = CurrentX + 1
+        currentX = currentX + 1
+        blocksTraveledX = blocksTraveledX + 1
+        blocksTraveledY = 0
         return true
-    elseif (Heading == "w" and CurrentX > 1) then
-        if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing West") end
+    elseif (heading == "w" and currentX > 1) then
+        if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing West") end
         TakeAction("forward")
-        CurrentX = CurrentX - 1
+        currentX = currentX - 1
+        blocksTraveledX = blocksTraveledX + 1
+        blocksTraveledY = 0
         return true
     end
 
@@ -142,25 +154,27 @@ function TryAdvance()
 end
 
 function AdvanceUpward()
-    if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing Upward") end
+    if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing Upward") end
     TakeAction("digUp")
     TakeAction("up")
-    CurrentY = CurrentY + 1
+    currentY = currentY + 1
+    blocksTraveledY = blocksTraveledY + 1
 end
 function AdvanceDownward()
-    if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Advancing Downward") end
+    if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Advancing Downward") end
     TakeAction("digDown")
     TakeAction("down")
-    CurrentY = CurrentY - 1
+    currentY = currentY - 1
+    blocksTraveledY = blocksTraveledY + 1
 end
 function DigUpToTop()
-    if (CurrentY >= MaxY) then return end
+    if (currentY >= maxY) then return end
 
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Digging Up To Top") end
+    if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Digging Up To Top") end
 
-    while (CurrentY < MaxY) do
-        if (SkipAirSpacesAbove and turtle.detectUp() == false) then
-            if (DebugLevel >= 3) then print("- - (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Detected Empty Space Above") end
+    while (currentY < maxY) do
+        if (skipAirSpacesAbove and turtle.detectUp() == false) then
+            if (debugLevel >= 3) then print("- - (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Detected Empty Space Above") end
             break
         end
         TryPoke()
@@ -168,16 +182,16 @@ function DigUpToTop()
     end
 end
 function DigDownToOne()
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Digging Down To Zero") end
+    if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Digging Down To Zero") end
 
-    while (CurrentY > 1) do
+    while (currentY > 1) do
         TryPoke()
         AdvanceDownward()
     end
 end
 
 function TryAdvanceTilEndOfLine()
-    if (DebugLevel >= 1) then print("(" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Beginning Line") end
+    if (debugLevel >= 1) then print("(" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Beginning Line") end
     local atDestination = (not TryPoke())
     if (atDestination) then return false end
     while (not atDestination) do
@@ -185,7 +199,7 @@ function TryAdvanceTilEndOfLine()
         TryAdvance()
         DigUpToTop()
         DigDownToOne()
-        if (SkipAirSpacesAbove == false) then
+        if (skipAirSpacesAbove == false) then
             TryAdvance()
         end
         atDestination = (not TryAdvance())
@@ -194,27 +208,27 @@ function TryAdvanceTilEndOfLine()
 end
 
 function TurnRight()
-    if (Heading == "n") then Heading = "e"
-    elseif (Heading == "e") then Heading = "s"
-    elseif (Heading == "s") then Heading = "w"
-    elseif (Heading == "w") then Heading = "n"
+    if (heading == "n") then heading = "e"
+    elseif (heading == "e") then heading = "s"
+    elseif (heading == "s") then heading = "w"
+    elseif (heading == "w") then heading = "n"
     end
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Right. New Heading = " ..Heading) end
+    if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Turned Right. New Heading = " ..heading) end
     TakeAction("turnRight")
 end
 function TurnLeft()
-    if (Heading == "n") then Heading = "w"
-    elseif (Heading == "w") then Heading = "s"
-    elseif (Heading == "s") then Heading = "e"
-    elseif (Heading == "e") then Heading = "n"
+    if (heading == "n") then heading = "w"
+    elseif (heading == "w") then heading = "s"
+    elseif (heading == "s") then heading = "e"
+    elseif (heading == "e") then heading = "n"
     end
-    if (DebugLevel >= 2) then print("- (" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") Turned Left. New Heading = " ..Heading) end
+    if (debugLevel >= 2) then print("- (" ..currentZ.. "," ..currentX.. "," ..currentY.. ") Turned Left. New Heading = " ..heading) end
     TakeAction("turnLeft")
 end
 function Turn()
-    if (PreviousUTurnDirection == "left") then
+    if (previousUTurnDirection == "left") then
         TurnRight()
-    elseif (PreviousUTurnDirection == "right") then
+    elseif (previousUTurnDirection == "right") then
         TurnLeft()
     end
 end
@@ -223,9 +237,9 @@ function TryUTurn()
     if (not TryAdvance()) then return false end
     Turn()
 
-    if (DebugLevel >= 1) then print("(" ..CurrentZ.. "," ..CurrentX.. "," ..CurrentY.. ") UTurning. Heading = " ..Heading) end
-    if (PreviousUTurnDirection == "right") then PreviousUTurnDirection = "left"
-    elseif (PreviousUTurnDirection == "left") then PreviousUTurnDirection = "right" end
+    if (debugLevel >= 1) then print("(" ..currentZ.. "," ..currentX.. "," ..currentY.. ") UTurning. Heading = " ..heading) end
+    if (previousUTurnDirection == "right") then previousUTurnDirection = "left"
+    elseif (previousUTurnDirection == "left") then previousUTurnDirection = "right" end
 
     return true
 end
@@ -237,9 +251,9 @@ function Main()
         print("aw heck you tricked me :'(")
         return
     end
-    if (DigOutWidthFirst) then
+    if (digOutWidthFirst) then
         TurnRight()
-        PreviousUTurnDirection = "right"
+        previousUTurnDirection = "right"
     end
 
     local done = false
@@ -249,6 +263,7 @@ function Main()
         done = (not TryUTurn())
     end
 
+    Transmit("Done :D")
     print("I'm all done! :D")
 end
 

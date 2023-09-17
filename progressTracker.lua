@@ -3,9 +3,16 @@ myModem.open(1)
 trackedSignals = {}
 
 function Display()
+    term.clear()
+    
+    local cursorPos = {1, 1}
     for key, value in pairs(trackedSignals) do
+        cursorPos[0] = 1
+        cursorPos[1] = cursorPos[1] + 1
+        term.setCursorPos(cursorPos[0], cursorPos[1])
         print(key, value)
     end
+    cursorPos = {1, 1}
 end
 
 function WaitForMessage()
