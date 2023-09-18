@@ -220,8 +220,6 @@ function TryUTurn()
     return true
 end
 
-
-
 function Main()
     if (TryAdvance() == false) then
         print("aw heck you tricked me :'(")
@@ -232,11 +230,9 @@ function Main()
         previousUTurnDirection = "right"
     end
 
-    local done = false
-    while (not done) do
-        done = (not TryAdvanceTilEndOfLine())
-        if (done) then break end
-        done = (not TryUTurn())
+    while (true) do
+        if (not TryAdvanceTilEndOfLine()) then break end
+        if (not TryUTurn()) then break end
     end
 
     Transmit("Done :D")
@@ -255,6 +251,8 @@ function DoIhaveEnoughFuel()
         shell.run("refuel all")
     end
 end
+
+
 
 Prompt()
 DoIhaveEnoughFuel()
