@@ -1,37 +1,35 @@
 myModem = peripheral.wrap("back")
 myModem.open(1)
-trackedSignals = {}
-
-function Display()
-    term.clear()
-    
-    local cursorPos = {1, 1}
-    for key, value in pairs(trackedSignals) do
-        cursorPos[0] = 1
-        cursorPos[1] = cursorPos[1] + 1
-        term.setCursorPos(cursorPos[0], cursorPos[1])
-        print(key, value)
-    end
-    cursorPos = {1, 1}
-end
+trackedSignals = {} -- {key, value} : key is the return channel, value is the last message received.
 
 function WaitForMessage()
     local event, modemSide, senderChannel, replyChannel, message, senderDistance
         = os.pullEvent("modem_message")
+    trackedSignals[replyChannel] = message
+end
 
-    if (trackedSignals[replyChannel] == nil) then
-        trackedSignals[replyChannel] = 0
-        return
+function DisplaySingle(replyChannel)
+    if (type(message) == "number") then term.setTextColour(colours.white)
+    elseif (type(message) == "string") then term.setTextColour(colours.green)
     end
-    if (type(message) == "number") then
-        trackedSignals[replyChannel] = message
+
+    local cursorPos = {1, 1}
+    for (key, value in pairs(trackedSignals)) do
+        cursorPos[2] = cursorPos[2] + 1
+        if (key == trackedSignals[replyChannel]) then
+            term.setCursorPos(cursorPos[1], cursorPos[1])
+            print(string.format("%6d %5d", key, value))
+            cursorPos[1] = 1
+        end
     end
+    cursorPos = {1, 1}
 end
 
 function Main()
+    term.clear()
     while (true) do
         WaitForMessage()
-        Display()
+        DisplaySingle()
     end
 end
 

@@ -15,7 +15,6 @@ local blocksTraveledY = 0
 local myModem = peripheral.wrap("right")
 local myChannel = math.random(100, 65530)
 local hostChannel = 1
-
 local debugLevel = 0 -- 0-3
 
 function Transmit(message)
@@ -41,16 +40,21 @@ end
 
 function Prompt()
     local input = ""
+    term.clear
 
-    print("How far should I dig?")
+    print("Beep boop OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
+    print("Thing is though I'm kinda dumb and idk where I am X.X plz tell me how much to dig cuz I can't see anything lol")
+    print()
+
+    print("How far forward should I dig?")
     maxZ = tonumber(read())
     if (maxZ < 1) then maxZ = 0 end
 
-    print("aaand how wide do you need it? :D")
+    print("aaand how wide do you want it? :3")
     maxX = tonumber(read())
     if (maxX < 1) then maxX = 1 end
 
-    print("ok last question! How tall? ^.^")
+    print("ok last question! How high up? ^.^")
     maxY = tonumber(read())
     if (maxY < 1) then maxY = 1 end
 
@@ -66,7 +70,8 @@ function Prompt()
         digOutWidthFirst = true
     end
 
-    print("kk I'll try to do it good for you master ^//^")
+    print("kk that's all! I'll try my best for you master ^//^")
+    print("Oh my channel is " ..myChannel.. " btw if you ever need me~")
 end
 
 function TryPoke()
@@ -208,7 +213,7 @@ function Turn()
         TurnLeft()
     end
 end
-function TryUTurn()    
+function TryUTurn()
     Turn()
     if (not TryAdvance()) then return false end
     Turn()
@@ -235,7 +240,7 @@ function Main()
         if (not TryUTurn()) then break end
     end
 
-    Transmit("Done :D")
+    Transmit("Done!")
     print("I'm all done! :D")
 end
 
