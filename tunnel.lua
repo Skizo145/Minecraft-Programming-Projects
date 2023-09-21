@@ -1,48 +1,65 @@
 local maxZ = 0
-local currentZ = 0
 local maxX = 1
-local currentX = 1
 local maxY = 1
+local currentZ = 0
+local currentX = 1
 local currentY = 1
+local blocksTraveledZ = 0
+local blocksTraveledX = 0
+local blocksTraveledY = 0
 
 local heading = "n"
 local previousUTurnDirection = "left"
 local skipAirSpacesAbove = false
 local digOutWidthFirst = false
-local blocksTraveledZ = 0
-local blocksTraveledX = 0
-local blocksTraveledY = 0
-local myModem = peripheral.wrap("right")
-local myChannel = math.random(100, 65530)
-local hostChannel = 1
+
+local <const> myModem = peripheral.wrap("right")
+local <const> myChannel = math.random(100, 65530)
+local <const> hostChannel = 1
+local <const> codeProgress = 0
+local <const> codeSuccess = 1
+local <const> codeFailure = 2
+local <const> successMessages = {"I'm done!", "Done :D", "All finished ^.^", "*Dances*"}
+local <const> errorMessages = {"Help plz", "x.x *dead*", "is stuck :(", "aw hec", "heckin stuck", "I can't do it :'("}
+
 local debugLevel = 0 -- 0-3
 
-function Transmit(message)
-    myModem.transmit(hostChannel, myChannel, message)
+
+
+function Transmit(codeNumber, message)
+    myModem.transmit(hostChannel, myChannel, (codeNumber .. message))
 end
+function TransmitSuccess()
+    Transmit(codeSuccess, successMessages[math.random(#successMessages)])
+end
+function TransmitFailure()
+    Transmit(codeFailure, errorMessages[math.random(#errorMessages)])
+end
+
 function GetPercentageComplete()
     return ((blocksTraveledZ * maxY) + (blocksTraveledX * maxY) + blocksTraveledY)
         / (maxZ * maxX * maxY) * 100 - maxY
 end
 function TakeAction(nameOfAction)
-    if (nameOfAction == "dig") then turtle.dig()
-    elseif (nameOfAction == "digUp") then turtle.digUp()
-    elseif (nameOfAction == "digDown") then turtle.digDown()
-    elseif (nameOfAction == "forward") then turtle.forward()
-    elseif (nameOfAction == "up") then turtle.up()
-    elseif (nameOfAction == "down") then turtle.down()
-    elseif (nameOfAction == "turnRight") then turtle.turnRight()
-    elseif (nameOfAction == "turnLeft") then turtle.turnLeft()
+    if (nameOfAction == "dig") then turtle.dig() return
+    elseif (nameOfAction == "digUp") then turtle.digUp() return
+    elseif (nameOfAction == "digDown") then turtle.digDown() return
+    elseif (nameOfAction == "turnRight") then turtle.turnRight() return
+    elseif (nameOfAction == "turnLeft") then turtle.turnLeft() return
     end
     
-    Transmit(GetPercentageComplete())
+    if (nameOfAction == "forward") then turtle.forward()
+    elseif (nameOfAction == "up") then turtle.up()
+    elseif (nameOfAction == "down") then turtle.down()
+    end
+    Transmit(codeProgress, GetPercentageComplete())
 end
 
 function Prompt()
     local input = ""
     term.clear
 
-    print("Beep boop OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
+    print("*Beep boop* OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
     print("Thing is though I'm kinda dumb and idk where I am X.X plz tell me how much to dig cuz I can't see anything lol")
     print()
 
@@ -71,7 +88,7 @@ function Prompt()
     end
 
     print("kk that's all! I'll try my best for you master ^//^")
-    print("Oh my channel is " ..myChannel.. " btw if you ever need me~")
+    print("Oh my channel is " ..myChannel.. " btw if you ever need me uwu~")
 end
 
 function TryPoke()
@@ -227,6 +244,7 @@ end
 
 function Main()
     if (TryAdvance() == false) then
+        TransmitFailure()
         print("aw heck you tricked me :'(")
         return
     end
@@ -240,8 +258,8 @@ function Main()
         if (not TryUTurn()) then break end
     end
 
-    Transmit("Done!")
-    print("I'm all done! :D")
+    TransmitSuccess()
+    print(successMessages[math.random(#successMessages)])
 end
 
 function DoIhaveEnoughFuel()

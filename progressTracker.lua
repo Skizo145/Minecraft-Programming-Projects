@@ -1,6 +1,9 @@
-myModem = peripheral.wrap("back")
-myModem.open(1)
-trackedSignals = {} -- {key, value} : key is the return channel, value is the last message received.
+local <const> myModem = peripheral.wrap("back")
+local trackedSignals = {} -- {key, value} : key is the return channel, value is the last message received.
+
+local <const> codeProgress = 0
+local <const> codeSuccess = 1
+local <const> codeFailure = 2
 
 function WaitForMessage()
     local event, modemSide, senderChannel, replyChannel, message, senderDistance
@@ -9,7 +12,7 @@ function WaitForMessage()
 end
 
 function DisplaySingle(replyChannel)
-    if (type(message) == "number") then term.setTextColour(colours.white)
+    if (pcall(tonumber(message))) then term.setTextColour(colours.white)
     elseif (type(message) == "string") then term.setTextColour(colours.green)
     end
 
@@ -27,6 +30,8 @@ end
 
 function Main()
     term.clear()
+    myModem.open(1)
+
     while (true) do
         WaitForMessage()
         DisplaySingle()
