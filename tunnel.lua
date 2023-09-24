@@ -13,27 +13,27 @@ local previousUTurnDirection = "left"
 local skipAirSpacesAbove = false
 local digOutWidthFirst = false
 
-local <const> myModem = peripheral.wrap("right")
-local <const> myChannel = math.random(100, 65530)
-local <const> hostChannel = 1
-local <const> codeProgress = 0
-local <const> codeSuccess = 1
-local <const> codeFailure = 2
-local <const> successMessages = {"I'm done!", "Done :D", "All finished ^.^", "*Dances*"}
-local <const> errorMessages = {"Help plz", "x.x *dead*", "is stuck :(", "aw hec", "heckin stuck", "I can't do it :'("}
+local MY_MODEM = peripheral.wrap("right")
+local MY_CHANNEL = math.random(100, 65530)
+local HOST_CHANNEL = 1
+local CODE_PROGRESS = 0
+local CODE_SUCCESS = 1
+local CODE_FAILURE = 2
+local SUCCESS_MESSAGES = {"I'm done!", "Done :D", "All finished ^.^", "*Dances*"}
+local ERROR_MESSAGES = {"Help plz", "x.x *dead*", "is stuck :(", "aw hec", "heckin stuck", "I can't do it :'("}
 
 local debugLevel = 0 -- 0-3
 
 
 
 function Transmit(codeNumber, message)
-    myModem.transmit(hostChannel, myChannel, (codeNumber .. message))
+    MY_MODEM.transmit(HOST_CHANNEL, MY_CHANNEL, (codeNumber .. message))
 end
 function TransmitSuccess()
-    Transmit(codeSuccess, successMessages[math.random(#successMessages)])
+    Transmit(CODE_SUCCESS, SUCCESS_MESSAGES[math.random(#SUCCESS_MESSAGES)])
 end
 function TransmitFailure()
-    Transmit(codeFailure, errorMessages[math.random(#errorMessages)])
+    Transmit(CODE_FAILURE, ERROR_MESSAGES[math.random(#ERROR_MESSAGES)])
 end
 
 function GetPercentageComplete()
@@ -52,12 +52,12 @@ function TakeAction(nameOfAction)
     elseif (nameOfAction == "up") then turtle.up()
     elseif (nameOfAction == "down") then turtle.down()
     end
-    Transmit(codeProgress, GetPercentageComplete())
+    Transmit(CODE_PROGRESS, GetPercentageComplete())
 end
 
 function Prompt()
     local input = ""
-    term.clear
+    term.clear()
 
     print("*Beep boop* OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
     print("Thing is though I'm kinda dumb and idk where I am X.X plz tell me how much to dig cuz I can't see anything lol")
@@ -88,7 +88,7 @@ function Prompt()
     end
 
     print("kk that's all! I'll try my best for you master ^//^")
-    print("Oh my channel is " ..myChannel.. " btw if you ever need me uwu~")
+    print("Oh my channel is " ..MY_CHANNEL.. " btw if you ever need me uwu~")
 end
 
 function TryPoke()
@@ -259,7 +259,7 @@ function Main()
     end
 
     TransmitSuccess()
-    print(successMessages[math.random(#successMessages)])
+    print(SUCCESS_MESSAGES[math.random(#SUCCESS_MESSAGES)])
 end
 
 function DoIhaveEnoughFuel()
