@@ -1,6 +1,7 @@
 local MY_MODEM = peripheral.wrap("back")
 local trackedSignals = {} -- {key, value} : key is the return channel, value is the last message received.
 
+local COLOR_DEFAULT = colors.gray
 local CODE_PROGRESS = 0
 local COLOR_PROGRESS = colors.gray
 local CODE_SUCCESS = 1
@@ -18,6 +19,7 @@ function SetTextColour(code)
     if (code == CODE_PROGRESS) then term.setTextColor(COLOR_PROGRESS)
     elseif (code == CODE_SUCCESS) then term.setTextColor(COLOR_SUCCESS)
     elseif (code == CODE_FAILURE) then term.setTextColor(COLOR_FAILURE)
+    else term.setTextColor(COLOR_DEFAULT)
     end
 end
 

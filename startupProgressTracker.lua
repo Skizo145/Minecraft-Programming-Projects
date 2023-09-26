@@ -1,0 +1,6 @@
+print("Updating & Running 'ProgressTracker'...")
+shell.run("delete progressTracker")
+sleep(1)
+shell.run("pastebin get U1WD4fKu progressTracker")
+sleep(1)
+shell.run("progressTracker")
