@@ -1,6 +1,6 @@
-print("Updating & Running 'ProgressTracker'...")
+print("Updating & Running 'progressTracker'...")
 shell.run("delete progressTracker")
 sleep(1)
 shell.run("pastebin get U1WD4fKu progressTracker")
 sleep(1)
-shell.run("progressTracker")
+shell.run("monitor right progressTracker")

@@ -58,6 +58,7 @@ end
 function Prompt()
     local input = ""
     term.clear()
+    term.setCursorPos(1, 1)
 
     print("*Beep boop* OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
     print("Thing is though I'm kinda dumb and idk where I am X.X plz tell me how much to dig cuz I can't see anything lol")
@@ -87,6 +88,7 @@ function Prompt()
         digOutWidthFirst = true
     end
 
+    print()
     print("kk that's all! I'll try my best for you master ^//^")
     print("Oh my channel is " ..MY_CHANNEL.. " btw if you ever need me uwu~")
 end
