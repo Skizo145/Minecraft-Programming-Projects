@@ -1,3 +1,4 @@
+local MY_CHANNEL = 1
 local MY_MODEM = peripheral.wrap("back")
 local trackedSignals = {} -- {key, value} : key is the return channel, value is the last message received.
 
@@ -9,12 +10,6 @@ local COLOR_SUCCESS = colors.lime
 local CODE_FAILURE = 2
 local COLOR_FAILURE = colors.red
 
-function WaitForMessage()
-    local event, modemSide, senderChannel, replyChannel, message, senderDistance
-        = os.pullEvent("modem_message")
-    return replyChannel, message
-end
-
 function SetTextColor(code)
     if (code == CODE_PROGRESS) then term.setTextColor(COLOR_PROGRESS)
     elseif (code == CODE_SUCCESS) then term.setTextColor(COLOR_SUCCESS)
@@ -23,7 +18,13 @@ function SetTextColor(code)
     end
 end
 
-function DisplaySingle(replyChannel, message)
+function WaitForMessage()
+    local event, modemSide, senderChannel, replyChannel, message, senderDistance
+        = os.pullEvent("modem_message")
+    return replyChannel, message
+end
+
+function DecryptMessage(message)
     local code = string.sub(message, 0, 1)
 
     if (pcall(tonumber, code)) then
@@ -31,10 +32,11 @@ function DisplaySingle(replyChannel, message)
         if (term.isColor()) then SetTextColor(code) end
         message = string.sub(message, 2)
     end
-    if (code == CODE_PROGRESS) then
-        message = tonumber(string.format("%.1f", message))
-    end
 
+    return message
+end
+function DisplaySingle(replyChannel, message)
+    message = DecryptMessage(message)
     trackedSignals[replyChannel] = message
 
     local cursorPos = {1, 1}
@@ -42,7 +44,7 @@ function DisplaySingle(replyChannel, message)
         if (key == replyChannel) then
             term.setCursorPos(cursorPos[1], cursorPos[2])
             term.clearLine()
-            io.write(string.format("%7s -- %s", key, value))
+            io.write(string.format("%7s || %s", key, value))
             break
         end
         cursorPos[2] = cursorPos[2] + 1
@@ -53,7 +55,7 @@ end
 function Main()
     term.clear()
     term.setCursorPos(1, 1)
-    MY_MODEM.open(1)
+    MY_MODEM.open(MY_CHANNEL)
 
     while (true) do
         local replyChannel, message = WaitForMessage()

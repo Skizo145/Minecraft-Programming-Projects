@@ -37,8 +37,9 @@ function TransmitFailure()
 end
 
 function GetPercentageComplete()
-    return ((blocksTraveledZ * maxY) + (blocksTraveledX * maxY) + blocksTraveledY)
-        / (maxZ * maxX * maxY) * 100 - maxY
+    return tonumber(string.format("%.1f",
+        ((blocksTraveledZ * maxY) + (blocksTraveledX * maxY) + blocksTraveledY)
+        / (maxZ * maxX * maxY) * 100 - maxY))
 end
 function TakeAction(nameOfAction)
     if (nameOfAction == "dig") then turtle.dig() return
@@ -63,7 +64,7 @@ function Prompt()
     print("*Beep boop* OMG hi nice to meet you ^.^ I'm a lil helper that can dig out big chunks of blocks :3")
     print("Thing is though I'm kinda dumb and idk where I am X.X plz tell me how much to dig cuz I can't see anything lol")
     print()
-
+    
     print("How far forward should I dig?")
     maxZ = tonumber(read())
     if (maxZ < 1) then maxZ = 0 end
